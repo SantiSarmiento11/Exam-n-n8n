@@ -502,6 +502,27 @@ textarea:focus {
   z-index: 3;
 }
 
+.damage-marker {
+  width: 30px;
+  height: 30px;
+  background: var(--danger);
+  border: 4px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(24, 32, 43, 0.28);
+}
+
+.damage-marker::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .map-center-cursor {
   position: absolute;
   left: 50%;

@@ -17,6 +17,7 @@ const imagePreview = document.querySelector("#imagePreview");
 let map;
 let marker;
 let reverseGeocodeController;
+let reverseGeocodeTimeout;
 
 /**
  * Genera un identificador local legible para que n8n pueda correlacionar el envío.
@@ -57,14 +58,36 @@ function setAddressFields({ displayName = "", address = {} } = {}) {
   }
 }
 
+function clearAddressFields() {
+  if (addressInput) addressInput.value = "";
+  if (neighborhoodInput) neighborhoodInput.value = "";
+  if (detectedCityInput) detectedCityInput.value = "";
+}
+
+function abortReverseGeocode() {
+  if (reverseGeocodeController) {
+    reverseGeocodeController.abort();
+    reverseGeocodeController = null;
+  }
+
+  if (reverseGeocodeTimeout) {
+    clearTimeout(reverseGeocodeTimeout);
+    reverseGeocodeTimeout = null;
+  }
+}
+
 async function updateAddressFromCoordinates(lat, lng) {
   if (!addressInput && !neighborhoodInput && !detectedCityInput) return;
 
-  if (reverseGeocodeController) {
-    reverseGeocodeController.abort();
-  }
+  abortReverseGeocode();
 
-  reverseGeocodeController = new AbortController();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+    setAddressFields({ displayName: "Dirección no encontrada" });
+  }, 8000);
+  reverseGeocodeController = controller;
+  reverseGeocodeTimeout = timeout;
 
   if (addressInput) {
     addressInput.value = "Buscando dirección...";
@@ -80,7 +103,7 @@ async function updateAddressFromCoordinates(lat, lng) {
     });
 
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
-      signal: reverseGeocodeController.signal
+      signal: controller.signal
     });
 
     if (!response.ok) {
@@ -95,11 +118,19 @@ async function updateAddressFromCoordinates(lat, lng) {
   } catch (error) {
     if (error.name === "AbortError") return;
     setAddressFields({ displayName: "Dirección no encontrada" });
+  } finally {
+    clearTimeout(timeout);
+
+    if (reverseGeocodeController === controller) {
+      reverseGeocodeController = null;
+      reverseGeocodeTimeout = null;
+    }
   }
 }
 
-function setCoordinates(lat, lng) {
+function setCoordinates(lat, lng, options = {}) {
   if (!latitudeInput || !longitudeInput) return;
+  const { lookupAddress = true } = options;
   latitudeInput.value = Number(lat).toFixed(6);
   longitudeInput.value = Number(lng).toFixed(6);
 
@@ -107,7 +138,9 @@ function setCoordinates(lat, lng) {
     mapStatus.textContent = `Ubicación seleccionada: ${latitudeInput.value}, ${longitudeInput.value}`;
   }
 
-  updateAddressFromCoordinates(latitudeInput.value, longitudeInput.value);
+  if (lookupAddress) {
+    updateAddressFromCoordinates(latitudeInput.value, longitudeInput.value);
+  }
 }
 
 function isPlaceholderWebhook(url) {
@@ -131,7 +164,17 @@ function initMap() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
- 
+  const markerIcon = L.divIcon({
+    className: "damage-marker",
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+
+  marker = L.marker([center.lat, center.lng], {
+    draggable: true,
+    icon: markerIcon,
+    title: "Ubicación del daño"
+  }).addTo(map);
 
   setCoordinates(center.lat, center.lng);
 
@@ -249,6 +292,13 @@ async function submitReport(event) {
   }
 
   const submitButton = reportForm.querySelector('button[type="submit"]');
+  const originalSubmitText = submitButton.textContent;
+  abortReverseGeocode();
+
+  if (addressInput?.value === "Buscando dirección...") {
+    addressInput.value = "";
+  }
+
   const formData = new FormData(reportForm);
   formData.append("reportId", createReportId());
   formData.append("source", "AMB Reporta Web");
@@ -275,13 +325,16 @@ async function submitReport(event) {
     const data = await response.json().catch(() => ({}));
     const caseId = data.caseId || formData.get("reportId");
     reportForm.reset();
-    imagePreview.hidden = true;
+    clearAddressFields();
+    if (imagePreview) {
+      imagePreview.hidden = true;
+    }
     setMessage(formMessage, `Reporte enviado correctamente. Código: ${caseId}`);
   } catch (error) {
     setMessage(formMessage, `No se pudo enviar el reporte: ${error.message}`, "error");
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = "Enviar a n8n";
+    submitButton.textContent = originalSubmitText;
   }
 }
 
