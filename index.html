@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portal ciudadano para reportar daños en bienes e infraestructura pública del Área Metropolitana de Bucaramanga.">
+  <title>AMB Reporta | Infraestructura Pública</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Inicio AMB Reporta">
+      <span class="brand-mark">AMB</span>
+      <span>
+        <strong>AMB Reporta</strong>
+        <small>Infraestructura pública</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="index.html" aria-current="page">Inicio</a>
+      <a href="reporte.html">Reportar daño</a>
+      <a href="seguimiento.html">Seguimiento</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero hero-home">
+      <div class="hero-content">
+        <p class="eyebrow">Zona Metropolitana de Bucaramanga</p>
+        <h1>Reportes ciudadanos para cuidar los bienes públicos.</h1>
+        <p class="hero-copy">
+          Registra solicitudes o quejas sobre daños en vías, parques, luminarias, señalización,
+          mobiliario urbano y otros elementos de infraestructura pública. La información queda lista
+          para ser procesada por un workflow en n8n con apoyo de IA.
+        </p>
+        <div class="hero-actions" aria-label="Acciones principales">
+          <a class="button button-primary" href="reporte.html">Crear reporte</a>
+          <a class="button button-secondary" href="seguimiento.html">Consultar seguimiento</a>
+        </div>
+      </div>
+
+      <aside class="city-panel" aria-label="Resumen del servicio">
+        <div class="panel-map" role="img" aria-label="Mapa abstracto del área metropolitana de Bucaramanga">
+          <span class="map-route route-one"></span>
+          <span class="map-route route-two"></span>
+          <span class="map-pin pin-main"></span>
+          <span class="map-pin pin-alt"></span>
+          <span class="map-pin pin-small"></span>
+        </div>
+        <div class="metric-row">
+          <span>
+            <strong>4 municipios</strong>
+            <small>Bucaramanga, Floridablanca, Girón y Piedecuesta</small>
+          </span>
+          <span>
+            <strong>24/7</strong>
+            <small>Recepción digital de reportes</small>
+          </span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section-grid" aria-labelledby="ayudas-title">
+      <div>
+        <p class="eyebrow">Antes de reportar</p>
+        <h2 id="ayudas-title">Ayudas y advertencias</h2>
+      </div>
+
+      <article class="info-card">
+        <span class="card-icon">!</span>
+        <h3>Prioriza la seguridad</h3>
+        <p>No te acerques a postes energizados, huecos profundos, estructuras inestables o zonas con tránsito peligroso.</p>
+      </article>
+
+      <article class="info-card">
+        <span class="card-icon">#</span>
+        <h3>Describe con precisión</h3>
+        <p>Incluye barrio, punto de referencia, tipo de daño, riesgo para peatones o conductores y tiempo aproximado del problema.</p>
+      </article>
+
+      <article class="info-card">
+        <span class="card-icon">+</span>
+        <h3>Adjunta evidencia</h3>
+        <p>Sube una imagen clara del daño. Evita fotografiar rostros, placas o datos personales si no son necesarios.</p>
+      </article>
+    </section>
+
+    <section class="workflow-band" aria-labelledby="workflow-title">
+      <div>
+        <p class="eyebrow">Integración</p>
+        <h2 id="workflow-title">Preparada para n8n e IA</h2>
+      </div>
+      <ol class="steps">
+        <li>El ciudadano diligencia el formulario y selecciona la ubicación.</li>
+        <li>La página envía texto, coordenadas e imagen a un webhook de n8n.</li>
+        <li>El workflow puede clasificar, priorizar y enrutar el caso con una IA.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Proyecto académico/prototipo para la gestión ciudadana de solicitudes y quejas.</p>
+    <a href="reporte.html">Iniciar un reporte</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Formulario ciudadano para reportar daños en infraestructura pública del Área Metropolitana de Bucaramanga.">
+  <title>Crear reporte | AMB Reporta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="report">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Inicio AMB Reporta">
+      <span class="brand-mark">AMB</span>
+      <span>
+        <strong>AMB Reporta</strong>
+        <small>Infraestructura pública</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="reporte.html" aria-current="page">Reportar daño</a>
+      <a href="seguimiento.html">Seguimiento</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-heading">
+      <p class="eyebrow">Nuevo caso ciudadano</p>
+      <h1>Formulario de solicitud o queja</h1>
+      <p>
+        Completa los datos del daño. Al enviar, la información viajará como una solicitud HTTP
+        hacia el webhook configurado en n8n.
+      </p>
+    </section>
+
+    <section class="form-layout">
+      <form id="reportForm" class="report-form" enctype="multipart/form-data" novalidate>
+        <div class="form-section">
+          <h2>Datos del reporte</h2>
+
+          <div class="field-grid">
+            <label>
+              Nombre completo
+              <input type="text" name="fullName" autocomplete="name" placeholder="Ej. Laura Gómez" required>
+            </label>
+
+            <label>
+              Correo electrónico
+              <input type="email" name="email" autocomplete="email" placeholder="ciudadano@correo.com" required>
+            </label>
+
+            <label>
+              Teléfono
+              <input type="tel" name="phone" autocomplete="tel" placeholder="300 000 0000" required>
+            </label>
+
+            <label>
+              Municipio
+              <select name="municipality" required>
+                <option value="">Selecciona una opción</option>
+                <option>Bucaramanga</option>
+                <option>Floridablanca</option>
+                <option>Girón</option>
+                <option>Piedecuesta</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Tipo de daño
+              <select name="damageType" required>
+                <option value="">Selecciona una categoría</option>
+                <option value="via">Vía, andén o separador</option>
+                <option value="alumbrado">Alumbrado público</option>
+                <option value="parque">Parque o zona verde</option>
+                <option value="senalizacion">Señalización vial</option>
+                <option value="mobiliario">Mobiliario urbano</option>
+                <option value="otro">Otro bien público</option>
+              </select>
+            </label>
+
+            <label>
+              Nivel de urgencia
+              <select name="priority" required>
+                <option value="">Selecciona una opción</option>
+                <option value="alta">Alta: riesgo inmediato</option>
+                <option value="media">Media: afecta movilidad o uso</option>
+                <option value="baja">Baja: mantenimiento preventivo</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Descripción del caso
+            <textarea name="description" rows="6" placeholder="Describe el daño, punto de referencia y riesgos observados." required></textarea>
+          </label>
+        </div>
+
+        <div class="form-section">
+          <h2>Ubicación e imagen</h2>
+
+          <div class="map-toolbar">
+            <button class="button button-secondary button-small" type="button" id="useCurrentLocation">Usar mi ubicación</button>
+            <span id="mapStatus" class="status-text">Selecciona un punto en el mapa.</span>
+          </div>
+
+          <div id="map" class="map-canvas" role="application" aria-label="Selector de ubicación en mapa">
+            <div class="map-fallback">
+              <span class="map-crosshair"></span>
+              <p>Mapa listo para Google Maps</p>
+              <small>Mientras configuras la API key, puedes hacer clic aquí para simular la selección de coordenadas.</small>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Latitud
+              <input id="latitude" type="number" name="latitude" step="any" placeholder="7.1193" required>
+            </label>
+            <label>
+              Longitud
+              <input id="longitude" type="number" name="longitude" step="any" placeholder="-73.1227" required>
+            </label>
+          </div>
+
+          <label class="file-control">
+            Imagen del daño
+            <input id="evidenceImage" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
+            <span>JPG, PNG o WEBP. Tamaño sugerido menor a 8 MB.</span>
+          </label>
+
+          <figure id="imagePreview" class="image-preview" hidden>
+            <img alt="Vista previa de la imagen cargada">
+            <figcaption>Vista previa de la evidencia</figcaption>
+          </figure>
+        </div>
+
+        <div class="form-actions">
+          <a class="button button-secondary" href="index.html">Volver</a>
+          <button class="button button-primary" type="submit">Enviar a n8n</button>
+        </div>
+
+        <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="integration-card">
+        <h2>Configuración rápida</h2>
+        <p>
+          Edita <strong>js/config.js</strong> y reemplaza <strong>N8N_WEBHOOK_URL</strong> por la URL real
+          del webhook. Para Google Maps, agrega tu API key al script del final de esta página.
+        </p>
+        <ul>
+          <li>El envío usa <strong>FormData</strong> para transportar texto, coordenadas e imagen.</li>
+          <li>El campo <strong>reportId</strong> se genera en el navegador para trazabilidad inicial.</li>
+          <li>n8n puede responder JSON con <strong>caseId</strong> para mostrarlo al ciudadano.</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>La información enviada debe corresponder a hechos verificables y de interés público.</p>
+    <a href="seguimiento.html">Ir a seguimiento</a>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <!-- Reemplaza YOUR_GOOGLE_MAPS_API_KEY por tu llave y descomenta esta línea para activar Google Maps.
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initGoogleMap"></script>
+  -->
+</body>
+</html>

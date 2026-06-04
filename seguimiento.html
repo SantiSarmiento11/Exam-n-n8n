@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Página de seguimiento para reportes ciudadanos enviados a n8n.">
+  <title>Seguimiento | AMB Reporta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="tracking">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Inicio AMB Reporta">
+      <span class="brand-mark">AMB</span>
+      <span>
+        <strong>AMB Reporta</strong>
+        <small>Infraestructura pública</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="reporte.html">Reportar daño</a>
+      <a href="seguimiento.html" aria-current="page">Seguimiento</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-heading">
+      <p class="eyebrow">Consulta ciudadana</p>
+      <h1>Seguimiento de solicitudes y quejas</h1>
+      <p>
+        Esta página puede conectarse a un segundo webhook de n8n para consultar el estado del caso,
+        mostrar observaciones de la entidad responsable y orientar al ciudadano.
+      </p>
+    </section>
+
+    <section class="tracking-layout">
+      <form id="trackingForm" class="tracking-form" novalidate>
+        <h2>Buscar reporte</h2>
+        <label>
+          Código del caso
+          <input type="text" name="caseId" placeholder="Ej. AMB-20260603-0001" required>
+        </label>
+        <label>
+          Correo registrado
+          <input type="email" name="email" placeholder="ciudadano@correo.com" required>
+        </label>
+        <button class="button button-primary" type="submit">Consultar</button>
+        <p id="trackingMessage" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <article id="trackingResult" class="tracking-result" hidden>
+        <div class="result-header">
+          <span class="status-pill">Recibido</span>
+          <strong id="resultCaseId">AMB-0000</strong>
+        </div>
+        <h2>Estado del trámite</h2>
+        <p id="resultSummary">
+          El reporte fue registrado y queda pendiente de clasificación por el workflow de n8n.
+        </p>
+        <ol class="timeline">
+          <li class="is-complete">Reporte recibido</li>
+          <li>Clasificación con IA</li>
+          <li>Asignación a dependencia</li>
+          <li>Respuesta al ciudadano</li>
+        </ol>
+      </article>
+
+      <aside class="info-card help-card">
+        <span class="card-icon">?</span>
+        <h2>Canales de ayuda</h2>
+        <p>
+          Si el daño representa un riesgo inmediato para la vida o la seguridad, usa primero las líneas
+          oficiales de emergencia y luego registra el caso para trazabilidad.
+        </p>
+        <a class="button button-secondary" href="reporte.html">Crear otro reporte</a>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Conserva el código del caso para futuras consultas.</p>
+    <a href="index.html">Volver al inicio</a>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
