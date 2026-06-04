@@ -5,13 +5,18 @@ const formMessage = document.querySelector("#formMessage");
 const trackingMessage = document.querySelector("#trackingMessage");
 const latitudeInput = document.querySelector("#latitude");
 const longitudeInput = document.querySelector("#longitude");
+const addressInput = document.querySelector("#address");
+const neighborhoodInput = document.querySelector("#neighborhood");
+const detectedCityInput = document.querySelector("#detectedCity");
 const mapStatus = document.querySelector("#mapStatus");
 const mapElement = document.querySelector("#map");
+const pinMapCenterButton = document.querySelector("#pinMapCenter");
 const imageInput = document.querySelector("#evidenceImage");
 const imagePreview = document.querySelector("#imagePreview");
 
-let googleMap;
-let googleMarker;
+let map;
+let marker;
+let reverseGeocodeController;
 
 /**
  * Genera un identificador local legible para que n8n pueda correlacionar el envío.
@@ -29,6 +34,70 @@ function setMessage(element, text, type = "success") {
   element.classList.toggle("is-error", type === "error");
 }
 
+function setAddressFields({ displayName = "", address = {} } = {}) {
+  if (addressInput) {
+    addressInput.value = displayName || "Dirección no encontrada";
+  }
+
+  if (neighborhoodInput) {
+    neighborhoodInput.value = address.neighbourhood
+      || address.suburb
+      || address.quarter
+      || address.city_district
+      || "";
+  }
+
+  if (detectedCityInput) {
+    detectedCityInput.value = address.city
+      || address.town
+      || address.village
+      || address.municipality
+      || address.county
+      || "";
+  }
+}
+
+async function updateAddressFromCoordinates(lat, lng) {
+  if (!addressInput && !neighborhoodInput && !detectedCityInput) return;
+
+  if (reverseGeocodeController) {
+    reverseGeocodeController.abort();
+  }
+
+  reverseGeocodeController = new AbortController();
+
+  if (addressInput) {
+    addressInput.value = "Buscando dirección...";
+  }
+
+  try {
+    const params = new URLSearchParams({
+      lat,
+      lon: lng,
+      format: "json",
+      addressdetails: "1",
+      "accept-language": "es"
+    });
+
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
+      signal: reverseGeocodeController.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`Nominatim respondió con estado ${response.status}`);
+    }
+
+    const data = await response.json();
+    setAddressFields({
+      displayName: data.display_name,
+      address: data.address
+    });
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    setAddressFields({ displayName: "Dirección no encontrada" });
+  }
+}
+
 function setCoordinates(lat, lng) {
   if (!latitudeInput || !longitudeInput) return;
   latitudeInput.value = Number(lat).toFixed(6);
@@ -37,62 +106,85 @@ function setCoordinates(lat, lng) {
   if (mapStatus) {
     mapStatus.textContent = `Ubicación seleccionada: ${latitudeInput.value}, ${longitudeInput.value}`;
   }
+
+  updateAddressFromCoordinates(latitudeInput.value, longitudeInput.value);
 }
 
 function isPlaceholderWebhook(url) {
   return !url || url.includes("TU-DOMINIO-N8N");
 }
 
-/**
- * Callback global para Google Maps. Se invoca desde el script oficial cuando se configure la API key.
- */
-window.initGoogleMap = function initGoogleMap() {
-  if (!mapElement || !window.google) return;
+function refreshMapSize() {
+  if (!map) return;
+  map.invalidateSize();
+}
+
+function initMap() {
+  if (!mapElement || !window.L) return;
 
   const center = config.DEFAULT_MAP_CENTER || { lat: 7.119349, lng: -73.122742 };
 
-  googleMap = new google.maps.Map(mapElement, {
-    center,
-    zoom: 13,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: true
-  });
+  map = L.map(mapElement).setView([center.lat, center.lng], 13);
 
-  googleMarker = new google.maps.Marker({
-    map: googleMap,
-    position: center,
-    draggable: true,
-    title: "Ubicación del daño"
-  });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+ 
 
   setCoordinates(center.lat, center.lng);
 
-  googleMap.addListener("click", (event) => {
-    const position = event.latLng;
-    googleMarker.setPosition(position);
-    setCoordinates(position.lat(), position.lng());
-  });
-
-  googleMarker.addListener("dragend", (event) => {
-    setCoordinates(event.latLng.lat(), event.latLng.lng());
-  });
-};
-
-function setupFallbackMap() {
-  if (!mapElement || window.google) return;
-
-  mapElement.addEventListener("click", (event) => {
-    const bounds = mapElement.getBoundingClientRect();
-    const xRatio = (event.clientX - bounds.left) / bounds.width;
-    const yRatio = (event.clientY - bounds.top) / bounds.height;
-    const center = config.DEFAULT_MAP_CENTER || { lat: 7.119349, lng: -73.122742 };
-
-    // Convierte el clic del mapa simulado en coordenadas cercanas al centro de Bucaramanga.
-    const lat = center.lat + (0.06 - yRatio * 0.12);
-    const lng = center.lng + (xRatio * 0.12 - 0.06);
+  map.on("click", (event) => {
+    const { lat, lng } = event.latlng;
+    marker.setLatLng([lat, lng]);
     setCoordinates(lat, lng);
   });
+
+  marker.on("dragend", (event) => {
+    const { lat, lng } = event.target.getLatLng();
+    setCoordinates(lat, lng);
+  });
+
+  if (pinMapCenterButton) {
+    pinMapCenterButton.addEventListener("click", () => {
+      const { lat, lng } = map.getCenter();
+      marker.setLatLng([lat, lng]);
+      map.setView([lat, lng], map.getZoom());
+      setCoordinates(lat, lng);
+    });
+  }
+
+  requestAnimationFrame(refreshMapSize);
+  setTimeout(refreshMapSize, 150);
+  setTimeout(refreshMapSize, 500);
+  window.addEventListener("load", refreshMapSize, { once: true });
+
+  if (window.ResizeObserver) {
+    const mapResizeObserver = new ResizeObserver(refreshMapSize);
+    mapResizeObserver.observe(mapElement);
+  }
+}
+
+function setupCoordinateInputs() {
+  if (!latitudeInput || !longitudeInput) return;
+
+  const updateFromInputs = () => {
+    const lat = Number(latitudeInput.value);
+    const lng = Number(longitudeInput.value);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    if (map && marker) {
+      marker.setLatLng([lat, lng]);
+      map.setView([lat, lng], Math.max(map.getZoom(), 16));
+    }
+
+    setCoordinates(lat, lng);
+  };
+
+  latitudeInput.addEventListener("change", updateFromInputs);
+  longitudeInput.addEventListener("change", updateFromInputs);
 }
 
 function setupGeolocation() {
@@ -113,10 +205,9 @@ function setupGeolocation() {
         const { latitude, longitude } = position.coords;
         setCoordinates(latitude, longitude);
 
-        if (googleMap && googleMarker) {
-          const selectedPosition = { lat: latitude, lng: longitude };
-          googleMap.setCenter(selectedPosition);
-          googleMarker.setPosition(selectedPosition);
+        if (map && marker) {
+          map.setView([latitude, longitude], Math.max(map.getZoom(), 16));
+          marker.setLatLng([latitude, longitude]);
         }
 
         button.disabled = false;
@@ -241,7 +332,8 @@ async function submitTracking(event) {
 
 if (reportForm) {
   reportForm.addEventListener("submit", submitReport);
-  setupFallbackMap();
+  initMap();
+  setupCoordinateInputs();
   setupGeolocation();
   setupImagePreview();
 }

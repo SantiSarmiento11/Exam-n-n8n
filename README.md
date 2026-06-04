@@ -26,23 +26,19 @@ El formulario de reportes envía una solicitud `POST` con `FormData`, incluyendo
 - `description`
 - `latitude`
 - `longitude`
+- `address`
+- `neighborhood`
+- `detectedCity`
 - `image`
 - `reportId`
 - `source`
 - `submittedAt`
 
-## Google Maps
+## Mapa con OpenStreetMap
 
-El formulario incluye un contenedor listo para Google Maps y un selector simulado mientras no exista API key.
+El formulario usa Leaflet con mosaicos de OpenStreetMap para seleccionar la ubicación del reporte.
 
-Para activar Google Maps:
-
-1. Abre `reporte.html`.
-2. Busca el script comentado de Google Maps al final del archivo.
-3. Reemplaza `YOUR_GOOGLE_MAPS_API_KEY` por tu llave.
-4. Descomenta la etiqueta `<script>`.
-
-La función `initGoogleMap` vive en `js/app.js` y permite seleccionar la ubicación con clic o arrastrando el marcador.
+La función `initMap` vive en `js/app.js` y permite seleccionar la ubicación con clic o arrastrando el marcador. No requiere credenciales ni llaves de acceso.
 
 ## Uso local
 
