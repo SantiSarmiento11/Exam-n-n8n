@@ -334,10 +334,11 @@ async function submitReport(event) {
   // Descripción
   payload.append("description", rawData.get("description") || "");
 
-  // Coordenadas como objeto serializado en JSON string (lat/lng del mapa)
-  const lat = rawData.get("latitude") || "";
-  const lng = rawData.get("longitude") || "";
-  payload.append("coordinates", JSON.stringify({ lat, lng }));
+  // Coordenadas: dos campos numéricos independientes (solo el número, sin JSON)
+  const lat = parseFloat(rawData.get("latitude") || "0");
+  const lng = parseFloat(rawData.get("longitude") || "0");
+  payload.append("latitude", lat);
+  payload.append("longitude", lng);
 
   // Imagen
   const imageFile = rawData.get("image");
@@ -424,9 +425,104 @@ async function submitTracking(event) {
   }
 }
 
+// ── Normalización de campos ────────────────────────────────────────────────
+/**
+ * Reglas por campo:
+ *  firstName / firstLastName → solo letras y caracteres con tilde/ñ,
+ *                              una única palabra (sin espacios),
+ *                              Capitalize (1ª letra mayúscula, resto minúscula) al perder el foco.
+ *  email     → todo en minúsculas, sin espacios.
+ *  phone     → solo dígitos, máximo 10.
+ *  description → contador de caracteres visible en tiempo real.
+ */
+function setupFieldNormalization() {
+  if (!reportForm) return;
+
+  // ── Regex de letras válidas (latín extendido, cubre español) ──
+  const LETTERS_ONLY = /[^A-Za-z\u00C0-\u024F]/g;
+
+  // Formatea: primera letra mayúscula, resto minúsculas
+  function capitalize(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  // ── Nombres ────────────────────────────────────────────────────
+  ["#firstName", "#firstLastName"].forEach((sel) => {
+    const input = reportForm.querySelector(sel);
+    if (!input) return;
+
+    // En tiempo real: eliminar cualquier carácter que no sea letra ni espacio
+    // (los espacios se bloquean así: si el usuario escribe un espacio, lo ignoramos)
+    input.addEventListener("input", () => {
+      const pos = input.selectionStart;
+      const cleaned = input.value.replace(LETTERS_ONLY, "");
+      input.value = cleaned;
+      // Restaurar posición del cursor
+      try { input.setSelectionRange(pos, pos); } catch (_) {}
+    });
+
+    // Al salir del campo: Capitalize
+    input.addEventListener("blur", () => {
+      input.value = capitalize(input.value.trim());
+    });
+  });
+
+  // ── Correo electrónico ─────────────────────────────────────────
+  const emailInput = reportForm.querySelector("#email");
+  if (emailInput) {
+    // En tiempo real: minúsculas y sin espacios
+    emailInput.addEventListener("input", () => {
+      const pos = emailInput.selectionStart;
+      emailInput.value = emailInput.value.replace(/\s/g, "").toLowerCase();
+      try { emailInput.setSelectionRange(pos, pos); } catch (_) {}
+    });
+
+    emailInput.addEventListener("blur", () => {
+      emailInput.value = emailInput.value.trim().toLowerCase();
+    });
+  }
+
+  // ── Teléfono ───────────────────────────────────────────────────
+  const phoneInput = reportForm.querySelector("#phone");
+  if (phoneInput) {
+    // En tiempo real: solo dígitos, máximo 10
+    phoneInput.addEventListener("input", () => {
+      const digits = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+      phoneInput.value = digits;
+    });
+
+    // Bloquear pegar texto no numérico
+    phoneInput.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData("text");
+      const digits = pasted.replace(/\D/g, "").slice(0, 10);
+      phoneInput.value = digits;
+    });
+  }
+
+  // ── Descripción: contador de caracteres ────────────────────────
+  const descTextarea = reportForm.querySelector("#description");
+  const descCounter  = reportForm.querySelector("#descCounter");
+  if (descTextarea && descCounter) {
+    const MAX = parseInt(descTextarea.getAttribute("maxlength") || "500", 10);
+
+    function updateCounter() {
+      const used = descTextarea.value.length;
+      descCounter.textContent = `${used} / ${MAX}`;
+      descCounter.classList.toggle("is-near-limit", used >= MAX * 0.85);
+      descCounter.classList.toggle("is-at-limit",   used >= MAX);
+    }
+
+    descTextarea.addEventListener("input", updateCounter);
+    updateCounter(); // estado inicial
+  }
+}
+
 // ── Inicialización ─────────────────────────────────────────────────────────
 if (reportForm) {
   reportForm.addEventListener("submit", submitReport);
+  setupFieldNormalization();
   initMap();
   setupGeolocation();
   setupImagePreview();

@@ -54,25 +54,46 @@
             <label>
               Primer nombre
               <input type="text" name="firstName" id="firstName"
-                autocomplete="given-name" placeholder="Ej. Laura" required>
+                autocomplete="given-name"
+                placeholder="Ej. Laura"
+                maxlength="30"
+                pattern="[A-Za-z\u00C0-\u024F]+"
+                title="Solo una palabra, únicamente letras"
+                required>
             </label>
 
             <label>
               Primer apellido
               <input type="text" name="firstLastName" id="firstLastName"
-                autocomplete="family-name" placeholder="Ej. Gómez" required>
+                autocomplete="family-name"
+                placeholder="Ej. Gómez"
+                maxlength="30"
+                pattern="[A-Za-z\u00C0-\u024F]+"
+                title="Solo una palabra, únicamente letras"
+                required>
             </label>
 
             <label>
               Correo electrónico
               <input type="email" name="email" id="email"
-                autocomplete="email" placeholder="ciudadano@correo.com" required>
+                autocomplete="email"
+                placeholder="ciudadano@correo.com"
+                maxlength="100"
+                required>
             </label>
 
             <label>
               Teléfono
+              <span class="field-hint">10 dígitos, ej. 3001234567</span>
               <input type="tel" name="phone" id="phone"
-                autocomplete="tel" placeholder="300 000 0000" required>
+                autocomplete="tel"
+                placeholder="3001234567"
+                inputmode="numeric"
+                maxlength="10"
+                minlength="10"
+                pattern="[0-9]{10}"
+                title="Exactamente 10 dígitos numéricos"
+                required>
             </label>
           </div>
 
@@ -90,7 +111,10 @@
           <label>
             Descripción del caso
             <textarea name="description" id="description" rows="5"
-              placeholder="Describe el daño, punto de referencia y riesgos observados." required></textarea>
+              placeholder="Describe el daño, punto de referencia y riesgos observados."
+              maxlength="500"
+              required></textarea>
+            <span class="char-counter" id="descCounter">0 / 500</span>
           </label>
         </div>
 

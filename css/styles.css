@@ -1185,6 +1185,39 @@ select { cursor: pointer; }
 }
 
 /* ================================================================
+   FIELD HELPERS (hint & char counter)
+   ================================================================ */
+
+/* Texto de ayuda bajo el label */
+.field-hint {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+/* Contador de caracteres en descripción */
+.char-counter {
+  display: block;
+  text-align: right;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: color var(--transition);
+}
+
+.char-counter.is-near-limit {
+  color: var(--accent);
+}
+
+.char-counter.is-at-limit {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* ================================================================
    SVG ICONS
    ================================================================ */
 
