@@ -3,24 +3,56 @@ const reportForm = document.querySelector("#reportForm");
 const trackingForm = document.querySelector("#trackingForm");
 const formMessage = document.querySelector("#formMessage");
 const trackingMessage = document.querySelector("#trackingMessage");
+
+// Coordenadas (campos ocultos — se envían al workflow)
 const latitudeInput = document.querySelector("#latitude");
 const longitudeInput = document.querySelector("#longitude");
-const addressInput = document.querySelector("#address");
-const neighborhoodInput = document.querySelector("#neighborhood");
+
+// Municipio detectado por el mapa (campo oculto — se envía al workflow)
 const detectedCityInput = document.querySelector("#detectedCity");
+
+// Display visual de coordenadas (solo lectura, sin name — NO se envía)
+const coordsText = document.querySelector("#coordsText");
+
+// Display visual de dirección detectada (solo lectura, sin name — NO se envía)
+const addressDisplay = document.querySelector("#addressDisplay");
+
 const mapStatus = document.querySelector("#mapStatus");
 const mapElement = document.querySelector("#map");
 const pinMapCenterButton = document.querySelector("#pinMapCenter");
 const imageInput = document.querySelector("#evidenceImage");
 const imagePreview = document.querySelector("#imagePreview");
 
+// ── Menú hamburguesa ──────────────────────────────────────────────────────
+const navToggle = document.querySelector("#navToggle");
+const mainNav = document.querySelector("#mainNav");
+
+if (navToggle && mainNav) {
+  navToggle.addEventListener("click", () => {
+    const expanded = navToggle.getAttribute("aria-expanded") === "true";
+    navToggle.setAttribute("aria-expanded", String(!expanded));
+    mainNav.classList.toggle("is-open", !expanded);
+    navToggle.classList.toggle("is-active", !expanded);
+  });
+
+  // Cerrar al hacer clic fuera
+  document.addEventListener("click", (e) => {
+    if (!navToggle.contains(e.target) && !mainNav.contains(e.target)) {
+      navToggle.setAttribute("aria-expanded", "false");
+      mainNav.classList.remove("is-open");
+      navToggle.classList.remove("is-active");
+    }
+  });
+}
+
+// ── Variables del mapa ────────────────────────────────────────────────────
 let map;
 let marker;
 let reverseGeocodeController;
 let reverseGeocodeTimeout;
 
 /**
- * Genera un identificador local legible para que n8n pueda correlacionar el envío.
+ * Genera un identificador local legible para correlacionar el envío.
  */
 function createReportId() {
   const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
@@ -35,33 +67,30 @@ function setMessage(element, text, type = "success") {
   element.classList.toggle("is-error", type === "error");
 }
 
-function setAddressFields({ displayName = "", address = {} } = {}) {
-  if (addressInput) {
-    addressInput.value = displayName || "Dirección no encontrada";
-  }
+/**
+ * Actualiza el campo oculto de ciudad detectada y el textarea visual de dirección.
+ * El textarea NO tiene atributo `name`, por lo que nunca se incluye en el FormData.
+ */
+function setDetectedCity({ displayName = "", address = {} } = {}) {
+  // Campo oculto → se envía al workflow
+  const city =
+    address.city ||
+    address.town ||
+    address.village ||
+    address.municipality ||
+    address.county ||
+    "";
+  if (detectedCityInput) detectedCityInput.value = city;
 
-  if (neighborhoodInput) {
-    neighborhoodInput.value = address.neighbourhood
-      || address.suburb
-      || address.quarter
-      || address.city_district
-      || "";
-  }
-
-  if (detectedCityInput) {
-    detectedCityInput.value = address.city
-      || address.town
-      || address.village
-      || address.municipality
-      || address.county
-      || "";
+  // Textarea visual → solo para el usuario, SIN name, nunca en el payload
+  if (addressDisplay) {
+    addressDisplay.value = displayName || "Dirección no encontrada";
   }
 }
 
-function clearAddressFields() {
-  if (addressInput) addressInput.value = "";
-  if (neighborhoodInput) neighborhoodInput.value = "";
+function clearDetectedCity() {
   if (detectedCityInput) detectedCityInput.value = "";
+  if (addressDisplay) addressDisplay.value = "";
 }
 
 function abortReverseGeocode() {
@@ -69,29 +98,26 @@ function abortReverseGeocode() {
     reverseGeocodeController.abort();
     reverseGeocodeController = null;
   }
-
   if (reverseGeocodeTimeout) {
     clearTimeout(reverseGeocodeTimeout);
     reverseGeocodeTimeout = null;
   }
 }
 
-async function updateAddressFromCoordinates(lat, lng) {
-  if (!addressInput && !neighborhoodInput && !detectedCityInput) return;
-
+async function updateDetectedCityFromCoordinates(lat, lng) {
+  if (!detectedCityInput) return;
   abortReverseGeocode();
 
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
-    setAddressFields({ displayName: "Dirección no encontrada" });
+    clearDetectedCity();
   }, 8000);
   reverseGeocodeController = controller;
   reverseGeocodeTimeout = timeout;
 
-  if (addressInput) {
-    addressInput.value = "Buscando dirección...";
-  }
+  // Indicar al usuario que se está buscando la dirección
+  if (addressDisplay) addressDisplay.value = "Buscando dirección…";
 
   try {
     const params = new URLSearchParams({
@@ -101,26 +127,18 @@ async function updateAddressFromCoordinates(lat, lng) {
       addressdetails: "1",
       "accept-language": "es"
     });
-
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
-      signal: controller.signal
-    });
-
-    if (!response.ok) {
-      throw new Error(`Nominatim respondió con estado ${response.status}`);
-    }
-
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?${params}`,
+      { signal: controller.signal }
+    );
+    if (!response.ok) throw new Error(`Nominatim ${response.status}`);
     const data = await response.json();
-    setAddressFields({
-      displayName: data.display_name,
-      address: data.address
-    });
+    setDetectedCity({ displayName: data.display_name, address: data.address });
   } catch (error) {
     if (error.name === "AbortError") return;
-    setAddressFields({ displayName: "Dirección no encontrada" });
+    clearDetectedCity();
   } finally {
     clearTimeout(timeout);
-
     if (reverseGeocodeController === controller) {
       reverseGeocodeController = null;
       reverseGeocodeTimeout = null;
@@ -131,15 +149,24 @@ async function updateAddressFromCoordinates(lat, lng) {
 function setCoordinates(lat, lng, options = {}) {
   if (!latitudeInput || !longitudeInput) return;
   const { lookupAddress = true } = options;
-  latitudeInput.value = Number(lat).toFixed(6);
-  longitudeInput.value = Number(lng).toFixed(6);
+
+  const latFixed = Number(lat).toFixed(6);
+  const lngFixed = Number(lng).toFixed(6);
+
+  latitudeInput.value = latFixed;
+  longitudeInput.value = lngFixed;
+
+  // Actualizar display visual de coordenadas
+  if (coordsText) {
+    coordsText.textContent = `${latFixed}, ${lngFixed}`;
+  }
 
   if (mapStatus) {
-    mapStatus.textContent = `Ubicación seleccionada: ${latitudeInput.value}, ${longitudeInput.value}`;
+    mapStatus.textContent = `Ubicación: ${latFixed}, ${lngFixed}`;
   }
 
   if (lookupAddress) {
-    updateAddressFromCoordinates(latitudeInput.value, longitudeInput.value);
+    updateDetectedCityFromCoordinates(latFixed, lngFixed);
   }
 }
 
@@ -209,27 +236,6 @@ function initMap() {
   }
 }
 
-function setupCoordinateInputs() {
-  if (!latitudeInput || !longitudeInput) return;
-
-  const updateFromInputs = () => {
-    const lat = Number(latitudeInput.value);
-    const lng = Number(longitudeInput.value);
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-    if (map && marker) {
-      marker.setLatLng([lat, lng]);
-      map.setView([lat, lng], Math.max(map.getZoom(), 16));
-    }
-
-    setCoordinates(lat, lng);
-  };
-
-  latitudeInput.addEventListener("change", updateFromInputs);
-  longitudeInput.addEventListener("change", updateFromInputs);
-}
-
 function setupGeolocation() {
   const button = document.querySelector("#useCurrentLocation");
   if (!button) return;
@@ -241,7 +247,14 @@ function setupGeolocation() {
     }
 
     button.disabled = true;
-    button.textContent = "Ubicando...";
+    // Mantener el SVG existente; solo cambiamos el nodo de texto del label
+    const btnLabel = button.querySelector(".btn-label") || button;
+    const prevHTML = button.innerHTML;
+    button.setAttribute("data-prev-html", prevHTML);
+    button.innerHTML = button.innerHTML.replace(
+      /Usar mi ubicación/,
+      "Ubicando\u2026"
+    );
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -254,12 +267,16 @@ function setupGeolocation() {
         }
 
         button.disabled = false;
-        button.textContent = "Usar mi ubicación";
+        button.innerHTML = button.getAttribute("data-prev-html");
       },
       () => {
-        setMessage(formMessage, "No fue posible obtener tu ubicación. Selecciona el punto manualmente.", "error");
+        setMessage(
+          formMessage,
+          "No fue posible obtener tu ubicación. Selecciona el punto manualmente.",
+          "error"
+        );
         button.disabled = false;
-        button.textContent = "Usar mi ubicación";
+        button.innerHTML = button.getAttribute("data-prev-html");
       },
       { enableHighAccuracy: true, timeout: 9000 }
     );
@@ -275,13 +292,16 @@ function setupImagePreview() {
       imagePreview.hidden = true;
       return;
     }
-
     const image = imagePreview.querySelector("img");
     image.src = URL.createObjectURL(file);
     imagePreview.hidden = false;
   });
 }
 
+// ── Envío del reporte ─────────────────────────────────────────────────────
+// JSON enviado al workflow de n8n:
+//   firstName, firstLastName, email, phone, municipality (opción elegida),
+//   description, coordinates: { lat, lng }, image (archivo binario), reportId, submittedAt
 async function submitReport(event) {
   event.preventDefault();
 
@@ -295,14 +315,35 @@ async function submitReport(event) {
   const originalSubmitText = submitButton.textContent;
   abortReverseGeocode();
 
-  if (addressInput?.value === "Buscando dirección...") {
-    addressInput.value = "";
-  }
+  // Construir el FormData solo con los campos requeridos
+  const rawData = new FormData(reportForm);
 
-  const formData = new FormData(reportForm);
-  formData.append("reportId", createReportId());
-  formData.append("source", "AMB Reporta Web");
-  formData.append("submittedAt", new Date().toISOString());
+  const payload = new FormData();
+  payload.append("reportId", createReportId());
+  payload.append("submittedAt", new Date().toISOString());
+
+  // Datos personales
+  payload.append("firstName", rawData.get("firstName") || "");
+  payload.append("firstLastName", rawData.get("firstLastName") || "");
+  payload.append("email", rawData.get("email") || "");
+  payload.append("phone", rawData.get("phone") || "");
+
+  // Municipio elegido por el usuario (select)
+  payload.append("municipality", rawData.get("municipality") || "");
+
+  // Descripción
+  payload.append("description", rawData.get("description") || "");
+
+  // Coordenadas como objeto serializado en JSON string (lat/lng del mapa)
+  const lat = rawData.get("latitude") || "";
+  const lng = rawData.get("longitude") || "";
+  payload.append("coordinates", JSON.stringify({ lat, lng }));
+
+  // Imagen
+  const imageFile = rawData.get("image");
+  if (imageFile && imageFile.size > 0) {
+    payload.append("image", imageFile);
+  }
 
   if (isPlaceholderWebhook(config.N8N_WEBHOOK_URL)) {
     setMessage(formMessage, "Configura N8N_WEBHOOK_URL en js/config.js antes de enviar a n8n.", "error");
@@ -315,7 +356,7 @@ async function submitReport(event) {
 
     const response = await fetch(config.N8N_WEBHOOK_URL, {
       method: "POST",
-      body: formData
+      body: payload
     });
 
     if (!response.ok) {
@@ -323,12 +364,10 @@ async function submitReport(event) {
     }
 
     const data = await response.json().catch(() => ({}));
-    const caseId = data.caseId || formData.get("reportId");
+    const caseId = data.caseId || payload.get("reportId");
     reportForm.reset();
-    clearAddressFields();
-    if (imagePreview) {
-      imagePreview.hidden = true;
-    }
+    if (coordsText) coordsText.textContent = "—";
+    if (imagePreview) imagePreview.hidden = true;
     setMessage(formMessage, `Reporte enviado correctamente. Código: ${caseId}`);
   } catch (error) {
     setMessage(formMessage, `No se pudo enviar el reporte: ${error.message}`, "error");
@@ -338,6 +377,7 @@ async function submitReport(event) {
   }
 }
 
+// ── Seguimiento ────────────────────────────────────────────────────────────
 async function submitTracking(event) {
   event.preventDefault();
 
@@ -355,7 +395,8 @@ async function submitTracking(event) {
   if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
     result.hidden = false;
     resultCaseId.textContent = formData.get("caseId");
-    resultSummary.textContent = "Modo demostración: configura N8N_TRACKING_WEBHOOK_URL para consultar datos reales desde n8n.";
+    resultSummary.textContent =
+      "Modo demostración: configura N8N_TRACKING_WEBHOOK_URL para consultar datos reales desde n8n.";
     setMessage(trackingMessage, "Consulta simulada cargada.");
     return;
   }
@@ -383,10 +424,10 @@ async function submitTracking(event) {
   }
 }
 
+// ── Inicialización ─────────────────────────────────────────────────────────
 if (reportForm) {
   reportForm.addEventListener("submit", submitReport);
   initMap();
-  setupCoordinateInputs();
   setupGeolocation();
   setupImagePreview();
 }

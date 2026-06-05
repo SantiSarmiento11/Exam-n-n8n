@@ -20,7 +20,11 @@
       </span>
     </a>
 
-    <nav class="main-nav" aria-label="Navegación principal">
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainNav">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
       <a href="index.html" aria-current="page">Inicio</a>
       <a href="reporte.html">Reportar daño</a>
       <a href="seguimiento.html">Seguimiento</a>
@@ -90,13 +94,13 @@
 
     <section class="workflow-band" aria-labelledby="workflow-title">
       <div>
-        <p class="eyebrow">Como funciona</p>
-        <h2 class="workflow-band-higher" id="workflow-title">Preparada para  dar solución rapida a Tus Problemas</h2>
-      </div>  
+        <p class="eyebrow">Cómo funciona</p>
+        <h2 class="workflow-band-higher" id="workflow-title">Preparada para dar solución rápida a tus problemas</h2>
+      </div>
       <ol class="steps">
-        <li>El ciudadano diligencia el formulario y selecciona la ubicación.</li>
-        <li>La página envía texto, coordenadas a nuestros servidores.</li>
-        <li>Automaticamente se clasifica, prioriza y enruta el caso y nuestro Personal lo evalua</li>
+        <li>El ciudadano diligencia el formulario y selecciona la ubicación en el mapa.</li>
+        <li>La página envía los datos y coordenadas a nuestros servidores de forma segura.</li>
+        <li>Automáticamente se clasifica, prioriza y enruta el caso y nuestro personal lo evalúa.</li>
       </ol>
     </section>
   </main>
@@ -105,5 +109,8 @@
     <p>Proyecto académico/prototipo para la gestión ciudadana de solicitudes y quejas.</p>
     <a href="reporte.html">Iniciar un reporte</a>
   </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

@@ -20,7 +20,11 @@
       </span>
     </a>
 
-    <nav class="main-nav" aria-label="Navegación principal">
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainNav">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
       <a href="index.html">Inicio</a>
       <a href="reporte.html">Reportar daño</a>
       <a href="seguimiento.html" aria-current="page">Seguimiento</a>
@@ -32,8 +36,7 @@
       <p class="eyebrow">Consulta ciudadana</p>
       <h1>Seguimiento de solicitudes y quejas</h1>
       <p>
-        Esta página puede conectarse a un segundo webhook de n8n para consultar el estado del caso,
-        mostrar observaciones de la entidad responsable y orientar al ciudadano.
+        Ingresa el código de tu reporte y el correo registrado para consultar el estado actual de tu caso.
       </p>
     </section>
 
@@ -48,13 +51,27 @@
           Correo registrado
           <input type="email" name="email" placeholder="ciudadano@correo.com" required>
         </label>
-        <button class="button button-primary" type="submit">Consultar</button>
+        <!-- SVG: search -->
+        <button class="button button-primary" type="submit">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          Consultar
+        </button>
         <p id="trackingMessage" class="form-message" role="status" aria-live="polite"></p>
       </form>
 
       <article id="trackingResult" class="tracking-result" hidden>
         <div class="result-header">
-          <span class="status-pill">Recibido</span>
+          <span class="status-pill">
+            <!-- SVG: check circle -->
+            <svg class="icon-inline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Recibido
+          </span>
           <strong id="resultCaseId">AMB-0000</strong>
         </div>
         <h2>Estado del trámite</h2>
@@ -62,28 +79,69 @@
           El reporte fue registrado y queda pendiente de clasificación por el workflow de n8n.
         </p>
         <ol class="timeline">
-          <li class="is-complete">Reporte recibido</li>
-          <li>Clasificación con IA</li>
-          <li>Asignación a dependencia</li>
-          <li>Respuesta al ciudadano</li>
+          <li class="is-complete">
+            <!-- SVG: check -->
+            <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" fill="var(--success-light)" stroke="var(--success)" stroke-width="1.3"/>
+              <path d="M4.5 7l2 2 3-3" stroke="var(--success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Reporte recibido
+          </li>
+          <li>
+            <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
+            </svg>
+            Clasificación con IA
+          </li>
+          <li>
+            <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
+            </svg>
+            Asignación a dependencia
+          </li>
+          <li>
+            <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
+            </svg>
+            Respuesta al ciudadano
+          </li>
         </ol>
       </article>
 
       <aside class="info-card help-card">
-        <span class="card-icon">?</span>
+        <!-- SVG: question / help -->
+        <span class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="7.5" stroke="white" stroke-width="1.5"/>
+            <path d="M7.8 7.8a2.2 2.2 0 1 1 2.95 2.07C10.3 10.14 10 10.66 10 11.2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="10" cy="13.5" r="0.9" fill="white"/>
+          </svg>
+        </span>
         <h2>Canales de ayuda</h2>
         <p>
           Si el daño representa un riesgo inmediato para la vida o la seguridad, usa primero las líneas
           oficiales de emergencia y luego registra el caso para trazabilidad.
         </p>
-        <a class="button button-secondary" href="reporte.html">Crear otro reporte</a>
+        <!-- SVG: plus -->
+        <a class="button button-secondary" href="reporte.html" style="margin-top:14px;">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Crear otro reporte
+        </a>
       </aside>
     </section>
   </main>
 
   <footer class="site-footer">
     <p>Conserva el código del caso para futuras consultas.</p>
-    <a href="index.html">Volver al inicio</a>
+    <!-- SVG: arrow left -->
+    <a href="index.html">
+      <svg class="icon-inline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M9 3L4 7l5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Volver al inicio
+    </a>
   </footer>
 
   <script src="js/config.js"></script>
