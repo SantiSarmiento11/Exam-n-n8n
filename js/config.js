@@ -3,7 +3,7 @@
  * Reemplaza estas URL por los webhooks reales publicados en n8n.
  */
 window.AMB_CONFIG = {
-  N8N_WEBHOOK_URL: "https://clarinet-paper-pledge.ngrok-free.dev/webhook-test/consulta",
+  N8N_WEBHOOK_URL: "https://clarinet-paper-pledge.ngrok-free.dev/webhook-test/Smartcity", 
   N8N_TRACKING_WEBHOOK_URL: "https://clarinet-paper-pledge.ngrok-free.dev/webhook-test/consulta",
   DEFAULT_MAP_CENTER: {
     lat: 7.119349,

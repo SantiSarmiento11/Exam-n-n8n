@@ -318,6 +318,7 @@ async function submitReport(event) {
   const rawData = new FormData(reportForm);
 
   const payload = new FormData();
+  payload.append("action", "crear");
   payload.append("reportId", createReportId());
   payload.append("submittedAt", new Date().toISOString());
 
@@ -554,6 +555,7 @@ async function cancelCurrentReport() {
   const cancelButton = document.querySelector("#cancelReportBtn");
   const originalText = cancelButton?.textContent || "Cancelar reporte";
   const cancelPayload = {
+    action: "actualizar",
     caseId: currentTrackingRequest.caseId,
     status: "Cancelado"
   };
