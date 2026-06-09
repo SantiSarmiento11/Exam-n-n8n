@@ -510,7 +510,10 @@ async function submitTracking(event) {
   }
 
   const formData = new FormData(trackingForm);
-  const requestData = Object.fromEntries(formData);
+  const requestData = {
+    request: "seguimiento",
+    ...Object.fromEntries(formData)
+  };
   currentTrackingRequest = requestData;
 
   if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
@@ -557,10 +560,10 @@ async function cancelCurrentReport() {
   const cancelPayload = {
     action: "actualizar",
     caseId: currentTrackingRequest.caseId,
-    status: "Cancelado"
+    status: "Solucionado"
   };
 
-  if (isPlaceholderWebhook(config.N8N_WEBHOOK_URL)) {
+  if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
     renderTrackingDashboard(
       {
         caseId: currentTrackingRequest.caseId,
@@ -580,7 +583,7 @@ async function cancelCurrentReport() {
       cancelButton.textContent = "Cancelando...";
     }
 
-    const response = await fetch(config.N8N_WEBHOOK_URL, {
+    const response = await fetch(config.N8N_TRACKING_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cancelPayload)
@@ -716,3 +719,6 @@ if (reportForm) {
 if (trackingForm) {
   trackingForm.addEventListener("submit", submitTracking);
 }
+
+document.querySelector("#closeDashboardBtn")?.addEventListener("click", closeTrackingDashboard);
+document.querySelector("#cancelReportBtn")?.addEventListener("click", cancelCurrentReport);
