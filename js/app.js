@@ -301,7 +301,7 @@ function setupImagePreview() {
 // ── Envío del reporte ─────────────────────────────────────────────────────
 // JSON enviado al workflow de n8n:
 //   firstName, firstLastName, email, phone, municipality (opción elegida),
-//   description, coordinates: { lat, lng }, image (archivo binario), reportId, submittedAt
+//   description, dirección, latitude, longitude, image (archivo binario), reportId, submittedAt
 async function submitReport(event) {
   event.preventDefault();
 
@@ -313,7 +313,6 @@ async function submitReport(event) {
 
   const submitButton = reportForm.querySelector('button[type="submit"]');
   const originalSubmitText = submitButton.textContent;
-  abortReverseGeocode();
 
   // Construir el FormData solo con los campos requeridos
   const rawData = new FormData(reportForm);
@@ -333,6 +332,10 @@ async function submitReport(event) {
 
   // Descripción
   payload.append("description", rawData.get("description") || "");
+
+  // Dirección detectada por el mapa
+  const mapAddress = addressDisplay?.value?.trim() || "Dirección no encontrada";
+  payload.append("dirección", mapAddress);
 
   // Coordenadas: dos campos numéricos independientes (solo el número, sin JSON)
   const lat = parseFloat(rawData.get("latitude") || "0");
@@ -379,6 +382,83 @@ async function submitReport(event) {
 }
 
 // ── Seguimiento ────────────────────────────────────────────────────────────
+let currentTrackingRequest = null;
+
+function normalizeStatus(status = "") {
+  return String(status || "Recibido").trim();
+}
+
+function isFinalStatus(status = "") {
+  const normalized = status.toLowerCase();
+  return ["cancelado", "cerrado", "resuelto", "finalizado"].some((item) =>
+    normalized.includes(item)
+  );
+}
+
+function setText(selector, value, fallback = "No disponible") {
+  const element = document.querySelector(selector);
+  if (!element) return;
+  element.textContent = value || fallback;
+}
+
+function updateDashboardTimeline(status = "") {
+  const normalized = status.toLowerCase();
+  const completeUntil = normalized.includes("respuesta") ||
+    normalized.includes("resuelto") ||
+    normalized.includes("cerrado")
+    ? 4
+    : normalized.includes("asign")
+      ? 3
+      : normalized.includes("clas")
+        ? 2
+        : 1;
+
+  ["#stepReceived", "#stepClassified", "#stepAssigned", "#stepAnswered"].forEach(
+    (selector, index) => {
+      const step = document.querySelector(selector);
+      if (step) step.classList.toggle("is-complete", index < completeUntil);
+    }
+  );
+}
+
+function renderTrackingDashboard(data = {}, requestData = {}) {
+  const result = document.querySelector("#trackingResult");
+  const cancelButton = document.querySelector("#cancelReportBtn");
+  const status = normalizeStatus(data.status || data.estado || "Recibido");
+
+  if (!result) return;
+
+  result.hidden = false;
+  setText("#resultCaseId", data.caseId || data.reportId || requestData.caseId, requestData.caseId);
+  setText("#resultStatus", status, "Recibido");
+  setText(
+    "#resultSummary",
+    data.summary ||
+      data.resumen ||
+      "El reporte fue encontrado y está en gestión por el equipo correspondiente.",
+    "El reporte fue encontrado y está en gestión por el equipo correspondiente."
+  );
+  setText("#resultMunicipality", data.municipality || data.municipio, "Por confirmar");
+  setText("#resultCategory", data.category || data.categoria, "Infraestructura pública");
+  setText("#resultPriority", data.priority || data.prioridad, "En revisión");
+  setText("#resultAssignedTo", data.assignedTo || data.responsable, "Pendiente de asignación");
+  setText("#resultDescription", data.description || data.descripcion, "Sin descripción disponible.");
+  setText("#resultAddress", data["dirección"] || data.address || data.direccion, "Dirección no disponible.");
+  updateDashboardTimeline(status);
+
+  if (cancelButton) {
+    const cancelable = data.cancelable ?? data.puedeCancelar ?? !isFinalStatus(status);
+    cancelButton.disabled = !cancelable;
+    cancelButton.textContent = cancelable ? "Cancelar reporte" : "Reporte cerrado";
+  }
+}
+
+function closeTrackingDashboard() {
+  const result = document.querySelector("#trackingResult");
+  if (result) result.hidden = true;
+  setMessage(trackingMessage, "");
+}
+
 async function submitTracking(event) {
   event.preventDefault();
 
@@ -389,15 +469,19 @@ async function submitTracking(event) {
   }
 
   const formData = new FormData(trackingForm);
-  const result = document.querySelector("#trackingResult");
-  const resultCaseId = document.querySelector("#resultCaseId");
-  const resultSummary = document.querySelector("#resultSummary");
+  const requestData = Object.fromEntries(formData);
+  currentTrackingRequest = requestData;
 
   if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
-    result.hidden = false;
-    resultCaseId.textContent = formData.get("caseId");
-    resultSummary.textContent =
-      "Modo demostración: configura N8N_TRACKING_WEBHOOK_URL para consultar datos reales desde n8n.";
+    renderTrackingDashboard(
+      {
+        caseId: requestData.caseId,
+        status: "Recibido",
+        summary: "Modo demostración: configura N8N_TRACKING_WEBHOOK_URL para consultar datos reales desde n8n.",
+        cancelable: true
+      },
+      requestData
+    );
     setMessage(trackingMessage, "Consulta simulada cargada.");
     return;
   }
@@ -408,7 +492,7 @@ async function submitTracking(event) {
     const response = await fetch(config.N8N_TRACKING_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.fromEntries(formData))
+      body: JSON.stringify(requestData)
     });
 
     if (!response.ok) {
@@ -416,12 +500,68 @@ async function submitTracking(event) {
     }
 
     const data = await response.json();
-    result.hidden = false;
-    resultCaseId.textContent = data.caseId || formData.get("caseId");
-    resultSummary.textContent = data.summary || "El reporte fue encontrado y está en gestión.";
+    renderTrackingDashboard(data, requestData);
     setMessage(trackingMessage, "Estado actualizado.");
   } catch (error) {
+    closeTrackingDashboard();
     setMessage(trackingMessage, `No se pudo consultar el reporte: ${error.message}`, "error");
+  }
+}
+
+async function cancelCurrentReport() {
+  if (!currentTrackingRequest) return;
+
+  const cancelButton = document.querySelector("#cancelReportBtn");
+  const originalText = cancelButton?.textContent || "Cancelar reporte";
+  const cancelPayload = { ...currentTrackingRequest, action: "cancelReport" };
+
+  if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
+    renderTrackingDashboard(
+      {
+        caseId: currentTrackingRequest.caseId,
+        status: "Cancelado",
+        summary: "El reporte quedó marcado como cancelado en modo demostración.",
+        cancelable: false
+      },
+      currentTrackingRequest
+    );
+    setMessage(trackingMessage, "Reporte cancelado en modo demostración.");
+    return;
+  }
+
+  try {
+    if (cancelButton) {
+      cancelButton.disabled = true;
+      cancelButton.textContent = "Cancelando...";
+    }
+
+    const response = await fetch(config.N8N_TRACKING_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cancelPayload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`n8n respondió con estado ${response.status}`);
+    }
+
+    const data = await response.json().catch(() => ({}));
+    renderTrackingDashboard(
+      {
+        ...data,
+        status: data.status || data.estado || "Cancelado",
+        summary: data.summary || data.resumen || "El reporte fue cancelado correctamente.",
+        cancelable: false
+      },
+      currentTrackingRequest
+    );
+    setMessage(trackingMessage, "Reporte cancelado correctamente.");
+  } catch (error) {
+    if (cancelButton) {
+      cancelButton.disabled = false;
+      cancelButton.textContent = originalText;
+    }
+    setMessage(trackingMessage, `No se pudo cancelar el reporte: ${error.message}`, "error");
   }
 }
 

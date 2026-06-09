@@ -62,9 +62,9 @@
         <p id="trackingMessage" class="form-message" role="status" aria-live="polite"></p>
       </form>
 
-      <article id="trackingResult" class="tracking-result" hidden>
+      <article id="trackingResult" class="tracking-result dashboard-panel" hidden>
         <div class="result-header">
-          <span class="status-pill">
+          <span class="status-pill" id="resultStatus">
             <!-- SVG: check circle -->
             <svg class="icon-inline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/>
@@ -74,12 +74,42 @@
           </span>
           <strong id="resultCaseId">AMB-0000</strong>
         </div>
-        <h2>Estado del trámite</h2>
+        <h2>Dashboard del reporte</h2>
         <p id="resultSummary">
           El reporte fue registrado y queda pendiente de clasificación por el workflow de n8n.
         </p>
+
+        <dl class="dashboard-grid" aria-label="Información del reporte">
+          <div>
+            <dt>Municipio</dt>
+            <dd id="resultMunicipality">Por confirmar</dd>
+          </div>
+          <div>
+            <dt>Categoría</dt>
+            <dd id="resultCategory">Infraestructura pública</dd>
+          </div>
+          <div>
+            <dt>Prioridad</dt>
+            <dd id="resultPriority">En revisión</dd>
+          </div>
+          <div>
+            <dt>Responsable</dt>
+            <dd id="resultAssignedTo">Pendiente de asignación</dd>
+          </div>
+        </dl>
+
+        <div class="dashboard-detail">
+          <h3>Descripción</h3>
+          <p id="resultDescription">Sin descripción disponible.</p>
+        </div>
+
+        <div class="dashboard-detail">
+          <h3>Dirección reportada</h3>
+          <p id="resultAddress">Dirección no disponible.</p>
+        </div>
+
         <ol class="timeline">
-          <li class="is-complete">
+          <li id="stepReceived" class="is-complete">
             <!-- SVG: check -->
             <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" fill="var(--success-light)" stroke="var(--success)" stroke-width="1.3"/>
@@ -87,25 +117,30 @@
             </svg>
             Reporte recibido
           </li>
-          <li>
+          <li id="stepClassified">
             <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
             </svg>
             Clasificación con IA
           </li>
-          <li>
+          <li id="stepAssigned">
             <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
             </svg>
             Asignación a dependencia
           </li>
-          <li>
+          <li id="stepAnswered">
             <svg class="icon-timeline" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" opacity="0.4"/>
             </svg>
             Respuesta al ciudadano
           </li>
         </ol>
+
+        <div class="dashboard-actions">
+          <button class="button button-secondary" type="button" id="closeDashboardBtn">Cerrar dashboard</button>
+          <button class="button button-danger" type="button" id="cancelReportBtn">Cancelar reporte</button>
+        </div>
       </article>
 
       <aside class="info-card help-card">
