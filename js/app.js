@@ -401,6 +401,42 @@ function setText(selector, value, fallback = "No disponible") {
   element.textContent = value || fallback;
 }
 
+function getTrackingValue(data = {}, keys = []) {
+  for (const key of keys) {
+    if (data[key] !== undefined && data[key] !== null && data[key] !== "") {
+      return data[key];
+    }
+  }
+  return "";
+}
+
+function normalizeTrackingResponse(data = {}) {
+  if (Array.isArray(data)) {
+    return normalizeTrackingResponse(data[0] || {});
+  }
+
+  return data.json || data.data || data;
+}
+
+function formatRequester(data = {}) {
+  const firstName = getTrackingValue(data, ["Nombre", "nombre", "firstName", "name"]);
+  const lastName = getTrackingValue(data, ["Apellido", "apellido", "lastName"]);
+  return [firstName, lastName].filter(Boolean).join(" ");
+}
+
+function formatCoordinates(data = {}) {
+  const latitude = getTrackingValue(data, ["Latitud", "latitud", "latitude", "lat"]);
+  const longitude = getTrackingValue(data, ["Longitud", "longitud", "longitude", "lng"]);
+
+  if (latitude === "" || longitude === "") return "";
+  return `Latitud: ${latitude}, Longitud: ${longitude}`;
+}
+
+function formatConfidence(data = {}) {
+  const confidence = getTrackingValue(data, ["Confianza", "confianza", "confidence"]);
+  return confidence === "" ? "" : `${confidence}%`;
+}
+
 function updateDashboardTimeline(status = "") {
   const normalized = status.toLowerCase();
   const completeUntil = normalized.includes("respuesta") ||
@@ -421,29 +457,33 @@ function updateDashboardTimeline(status = "") {
   );
 }
 
-function renderTrackingDashboard(data = {}, requestData = {}) {
+function renderTrackingDashboard(responseData = {}, requestData = {}) {
+  const data = normalizeTrackingResponse(responseData);
   const result = document.querySelector("#trackingResult");
   const cancelButton = document.querySelector("#cancelReportBtn");
-  const status = normalizeStatus(data.status || data.estado || "Recibido");
+  const status = normalizeStatus(getTrackingValue(data, ["status", "estado"]) || "Recibido");
 
   if (!result) return;
 
   result.hidden = false;
-  setText("#resultCaseId", data.caseId || data.reportId || requestData.caseId, requestData.caseId);
+  setText("#resultCaseId", getTrackingValue(data, ["caseId", "reportId", "id"]) || requestData.caseId, requestData.caseId);
   setText("#resultStatus", status, "Recibido");
   setText(
     "#resultSummary",
-    data.summary ||
-      data.resumen ||
+    getTrackingValue(data, ["summary", "resumen", "Resumen"]) ||
       "El reporte fue encontrado y está en gestión por el equipo correspondiente.",
     "El reporte fue encontrado y está en gestión por el equipo correspondiente."
   );
-  setText("#resultMunicipality", data.municipality || data.municipio, "Por confirmar");
-  setText("#resultCategory", data.category || data.categoria, "Infraestructura pública");
-  setText("#resultPriority", data.priority || data.prioridad, "En revisión");
-  setText("#resultAssignedTo", data.assignedTo || data.responsable, "Pendiente de asignación");
-  setText("#resultDescription", data.description || data.descripcion, "Sin descripción disponible.");
-  setText("#resultAddress", data["dirección"] || data.address || data.direccion, "Dirección no disponible.");
+  setText("#resultRequester", formatRequester(data), "Por confirmar");
+  setText("#resultCategory", getTrackingValue(data, ["Categoría", "Categoria", "category", "categoria"]), "Infraestructura pública");
+  setText("#resultPriority", getTrackingValue(data, ["Prioridad", "priority", "prioridad"]), "En revisión");
+  setText("#resultConfidence", formatConfidence(data), "Por confirmar");
+  setText("#resultDescription", getTrackingValue(data, ["Descripción", "Descripcion", "description", "descripcion"]), "Sin descripción disponible.");
+  setText(
+    "#resultLocation",
+    formatCoordinates(data) || getTrackingValue(data, ["dirección", "Dirección", "address", "direccion"]),
+    "Ubicación no disponible."
+  );
   updateDashboardTimeline(status);
 
   if (cancelButton) {
@@ -513,9 +553,12 @@ async function cancelCurrentReport() {
 
   const cancelButton = document.querySelector("#cancelReportBtn");
   const originalText = cancelButton?.textContent || "Cancelar reporte";
-  const cancelPayload = { ...currentTrackingRequest, action: "cancelReport" };
+  const cancelPayload = {
+    caseId: currentTrackingRequest.caseId,
+    status: "Cancelado"
+  };
 
-  if (isPlaceholderWebhook(config.N8N_TRACKING_WEBHOOK_URL)) {
+  if (isPlaceholderWebhook(config.N8N_WEBHOOK_URL)) {
     renderTrackingDashboard(
       {
         caseId: currentTrackingRequest.caseId,
@@ -535,7 +578,7 @@ async function cancelCurrentReport() {
       cancelButton.textContent = "Cancelando...";
     }
 
-    const response = await fetch(config.N8N_TRACKING_WEBHOOK_URL, {
+    const response = await fetch(config.N8N_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cancelPayload)
