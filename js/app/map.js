@@ -122,7 +122,13 @@ export function initMap() {
   if (!mapElement || !window.L) return;
 
   const center = config.DEFAULT_MAP_CENTER || { lat: 7.119349, lng: -73.122742 };
-  map = L.map(mapElement).setView([center.lat, center.lng], 13);
+  map = L.map(mapElement, {
+    zoomControl: false,
+    attributionControl: false
+  }).setView([center.lat, center.lng], 13);
+
+  // Zoom: esquina superior izquierda, diseño profesional vía CSS
+  L.control.zoom({ position: "topleft" }).addTo(map);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,

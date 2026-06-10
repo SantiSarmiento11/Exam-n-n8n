@@ -36,6 +36,7 @@ async function submitReport(event) {
   payload.append("action", "crear");
   payload.append("reportId", createReportId());
   payload.append("submittedAt", new Date().toISOString());
+  payload.append("status", "pendiente");
   payload.append("firstName", rawData.get("firstName") || "");
   payload.append("firstLastName", rawData.get("firstLastName") || "");
   payload.append("email", rawData.get("email") || "");

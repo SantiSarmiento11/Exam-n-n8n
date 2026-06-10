@@ -130,7 +130,8 @@ async function submitTracking(event) {
 
   const formData = new FormData(trackingForm);
   const requestData = {
-    ...Object.fromEntries(formData)
+    ...Object.fromEntries(formData),
+    action: "Consulta"
   };
   currentTrackingRequest = requestData;
 
