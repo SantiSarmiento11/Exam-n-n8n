@@ -1,0 +1,1331 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Smartcity",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -496,
+        -288
+      ],
+      "id": "67a2c542-f8b3-4c78-bcf5-7eb063d75a86",
+      "name": "Webhook",
+      "webhookId": "5423d564-cf44-4cb9-b8fe-5c6825bce53f"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -336,
+        -288
+      ],
+      "id": "eb41c549-56b7-4baf-b38c-1aa44e426176",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger3').item.json.message.chat.id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "id": "ae9a5a2b-eca5-4ac2-9e7e-b220ed32fd9e",
+      "name": "Mostrar Estado y Preguntar1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -48
+      ],
+      "webhookId": "9197f6da-7b07-42c7-a888-5c53a3d5f0dc",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "0bd54dc0-cac3-4e26-8a00-147808b83496",
+      "name": "Telegram Trigger3",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -592,
+        80
+      ],
+      "webhookId": "telegram-webhook-001",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7832436849",
+        "text": "Felicidades! Tu reporte ha sido anexado exitosamente",
+        "replyMarkup": "={{ $json['Teléfono'] }}",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        -464
+      ],
+      "id": "a753965e-29df-4450-84af-8e584a63c04a",
+      "name": "Send a text message",
+      "webhookId": "d2ad1f4a-a641-438f-b099-6aff6c968810",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "19d6d4c2-d299-49c3-add6-2712a57bcbb4",
+              "name": "Ticket ID",
+              "value": "={{ $json.body.reportId }}",
+              "type": "string"
+            },
+            {
+              "id": "18078a2f-2c4c-4cbb-8359-5eac76966e48",
+              "name": "Nombre",
+              "value": "={{ $json.body.firstName }}",
+              "type": "string"
+            },
+            {
+              "id": "4d31ecb6-8360-4a0a-8053-ace73e74ebf9",
+              "name": "Apellido",
+              "value": "={{ $json.body.firstLastName }}",
+              "type": "string"
+            },
+            {
+              "id": "167c18c8-3737-474a-b378-95dba7b595b1",
+              "name": "Email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "ac2832b1-70cd-4a05-bd34-be7f817fd472",
+              "name": "Teléfono",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "0cf52278-29a5-4128-8d4a-255048cad632",
+              "name": "Descripción",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            },
+            {
+              "id": "04f61231-f986-4c43-8ea2-df558939168f",
+              "name": "Dirección",
+              "value": "={{ $json.body['dirección'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bf9a85c1-390e-4a36-8087-e11c4729566d",
+              "name": "Latitud",
+              "value": "={{ $json.body.latitude }}",
+              "type": "string"
+            },
+            {
+              "id": "b1c8208b-c5f0-4f9a-b944-f698f0045eeb",
+              "name": "Longitud",
+              "value": "={{ $json.body.longitude }}",
+              "type": "string"
+            },
+            {
+              "id": "288c95d8-9da0-4cbd-b305-d5821e1fee6e",
+              "name": "Categoría",
+              "value": "={{ $json.Categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "4c4b8cfc-897d-4157-9b71-664e610e0059",
+              "name": "Prioridad",
+              "value": "={{ $json.Prioridad }}",
+              "type": "string"
+            },
+            {
+              "id": "677ddee2-2f30-4e36-b174-f6b77e500b42",
+              "name": "Confianza",
+              "value": "={{ $json.Confianza }}",
+              "type": "number"
+            },
+            {
+              "id": "f4cc09c8-6e21-41f3-bd23-16021d57f48e",
+              "name": "Spam",
+              "value": "={{ $json.es_spam }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        -304
+      ],
+      "id": "b3f1a623-e351-4e09-8a2b-92d2ee0788be",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtener el texto crudo de Gemini\nconst rawText = $input.first().json.output;\n\n// 2. Limpiar los caracteres de markdown (```json y ```)\nconst cleanText = rawText.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n\n// 3. Convertir el texto a un objeto JSON real\nconst parsedJson = JSON.parse(cleanText);\n\n// 4. Retornar el JSON limpio\nreturn { json: parsedJson };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -496
+      ],
+      "id": "50a2b1c1-7c17-49cc-96df-61cca6ba24c9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1JKmi6p2tBdasKlr9nXp_rGqwMQyKspRo0zb7NKJmhZc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Hoja 1",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket  ID",
+              "lookupValue": "={{ $json.data['Correo/ID'] }}"
+            },
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.data['Correo/ID'] }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -112,
+        48
+      ],
+      "id": "a8690b7c-2af5-4019-9d90-fe97d6c53d27",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9ZrZCSNeDajOfyoZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition_exists",
+              "leftValue": "={{ $json['Ticket  ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4adc3b76-a995-4449-bf38-e4f56a4e7ce2",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "fb6b1cc8-b8d2-48a3-85db-91e8e8a72004",
+      "name": "¿Existe ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        64,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $json.message.from.id }}",
+        "message": "👋 Hola! Por favor ingresa tu *correo electrónico* o tu *ID de reporte* para consultar el estado de tus reportes:",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Correo/ID",
+              "placeholder": "correo@email.com / AMB-2026...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aca69160-dd71-4274-aebe-3da4b5f20285",
+      "name": "Pedir info",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        96
+      ],
+      "webhookId": "ca51b802-2231-4a7a-af8d-0026a5eb5b26",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger3').item.json.message.chat.id }}",
+        "text": "❌ No encontramos ningún reporte asociado a ese correo/ID.\n\nVerifica que el correo sea correcto o contacta a soporte.",
+        "additionalFields": {}
+      },
+      "id": "0f33a113-2cd1-4b63-a7b6-7496d0ff1751",
+      "name": "No encontrado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        144
+      ],
+      "webhookId": "c390c667-cdd1-41ba-b645-dc8ff8bb32bb",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst reports = items.map(item => item.json);\n\nif (reports.length === 0) {\n  return [{ \n    json: { \n      message: \"❌ No se encontraron reportes asociados a ese ID.\" \n    } \n  }];\n}\n\nlet response = \"📋 *ESTADO DEL REPORTE*\\n\\n\";\n\nreports.forEach(report => {\n  // Ajusta estos nombres según tus columnas exactas en Google Sheets\n  const ticket = $input.first().json['Ticket  ID'] || report.ticket_id || \"N/A\";\n  const tipoDaño = $input.first().json['Categoría'] || report.tipo_daño || \"N/A\";\n  const severidad = $input.first().json.Prioridad || report.severidad || \"N/A\";\n  const estado = $input.first().json['Estado Actual'] || report.estado || \"N/A\";\n  const ubicacion = $input.first().json['Dirección'] || report.ubicacion || \"N/A\";\n  \n  response += `🎟 *Ticket:* ${ticket}\\n`;\n  response += `📍 *Ubicación:* ${ubicacion}\\n`;\n  response += `⚠️ *Daño:* ${tipoDaño}\\n`;\n  response += `🔴 *Severidad:* ${severidad}\\n`;\n  response += `🔄 *Estado:* ${estado}\\n\\n`;\n});\n\nreturn [{ \n  json: { \n    message: response,\n    reportData: reports[0] // Mantiene los datos originales si los necesitas después\n  } \n}];"
+      },
+      "id": "14bc8d87-4b6f-4bc0-b887-1750312cc12b",
+      "name": "Organizar estado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea33a3b3-5488-416d-8066-26deb5887bc1",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        960,
+        -304
+      ],
+      "id": "13d158fd-6b39-4d04-9108-741e4c21d6e3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consulta",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        144,
+        544
+      ],
+      "id": "910eabfb-c39d-4236-8fc3-7e56e6edf459",
+      "name": "Dashboard",
+      "webhookId": "2fe47d52-e2e0-45a0-8f85-2c86f4278cd9"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1JKmi6p2tBdasKlr9nXp_rGqwMQyKspRo0zb7NKJmhZc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Hoja 1",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ticket  ID",
+              "lookupValue": "={{ $json.body.caseId }}"
+            },
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        640
+      ],
+      "id": "4669b445-0f64-4f56-8743-42b1436639a5",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9ZrZCSNeDajOfyoZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1008,
+        656
+      ],
+      "id": "da0ac601-46b9-4e1b-8db1-466639dc70c5",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "683e98d0-8475-4ca8-883a-173a15ce453c",
+              "name": "caseId",
+              "value": "={{ $json['Ticket  ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "06ef9006-0a78-465e-aac9-f31bbbf71f92",
+              "name": "Nombre",
+              "value": "={{ $json.Nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "003d38aa-cf4b-46b5-a855-22d974aa048a",
+              "name": "Apellido",
+              "value": "={{ $json.Apellido }}",
+              "type": "string"
+            },
+            {
+              "id": "630ede63-2109-4af7-bf2c-a21f03217660",
+              "name": "Descripción",
+              "value": "={{ $json['Descripción'] }}",
+              "type": "string"
+            },
+            {
+              "id": "e230c122-a8d4-45d6-b041-3d31d51d5d9a",
+              "name": "Categoría",
+              "value": "={{ $json['Categoría'] }}",
+              "type": "string"
+            },
+            {
+              "id": "3e56f3c4-e956-49a2-b317-ae423476f861",
+              "name": "Prioridad",
+              "value": "={{ $json.Prioridad }}",
+              "type": "string"
+            },
+            {
+              "id": "28102a11-c49a-4332-af8e-a75d02ccf54f",
+              "name": "Latitud",
+              "value": "={{ $json.Latitud }}",
+              "type": "number"
+            },
+            {
+              "id": "f510e5f8-9a24-467c-9db4-1113f6d509d5",
+              "name": "Longitud",
+              "value": "={{ $json.Longitud }}",
+              "type": "number"
+            },
+            {
+              "id": "9e5751d2-3165-4544-8755-60abff303817",
+              "name": "Confianza",
+              "value": "={{ $json.Confianza }}",
+              "type": "number"
+            },
+            {
+              "id": "426d26b6-82a1-41da-9cbe-dfe9e3ab0c9f",
+              "name": "status",
+              "value": "={{ $json['Estado Actual'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        656
+      ],
+      "id": "a9a5e4cf-2025-4b1c-93c7-e739d6a364de",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "179ba641-7926-4215-9721-ebcf97cf2a46",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "actualizar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        512
+      ],
+      "id": "ad6f76bc-270a-4922-985c-79bb5ff4a71e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "7832436849",
+        "text": "Felicidades! Tu reporte ha sido solucionado exitosamente",
+        "replyMarkup": "={{ $json['Teléfono'] }}",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        448
+      ],
+      "id": "5e4cccf2-2fac-468c-bb41-fc20bfca0e98",
+      "name": "Send a text message1",
+      "webhookId": "d2ad1f4a-a641-438f-b099-6aff6c968810",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1JKmi6p2tBdasKlr9nXp_rGqwMQyKspRo0zb7NKJmhZc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Hoja 1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Estado Actual": "={{ $json.body.status }}"
+          },
+          "matchingColumns": [
+            "Estado Actual"
+          ],
+          "schema": [
+            {
+              "id": "Ticket  ID",
+              "displayName": "Ticket  ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Apellido",
+              "displayName": "Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Latitud",
+              "displayName": "Latitud",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Longitud",
+              "displayName": "Longitud",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Confianza",
+              "displayName": "Confianza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Spam",
+              "displayName": "Spam",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Estado Actual",
+              "displayName": "Estado Actual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        592,
+        448
+      ],
+      "id": "c3a79268-9b47-4593-8324-6ef2b6d04eeb",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9ZrZCSNeDajOfyoZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analiza esta imagen de infraestructura urbana y sus descripción: \"{{ $json.body.description }}\" \n\nResponde ÚNICAMENTE con JSON:\n{\n\"Categoria\": \"string\",\n\"Prioridad\": \"Crítica\" o \"Moderada\" o \"Baja\",\n\"Confianza\": 0-100,\n\"es_spam\": true/false\n} ",
+        "options": {
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        -592
+      ],
+      "id": "e3e82c67-8dee-405f-8d7f-415f3a3fcb2b",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": "google/gemma-4-31b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -432
+      ],
+      "id": "31e818b3-b800-400b-a8bc-51c31cdc9f65",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Mj2FjGvKxKUtLedh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1JKmi6p2tBdasKlr9nXp_rGqwMQyKspRo0zb7NKJmhZc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Hoja 1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket  ID": "={{ $json['Ticket ID'] }}",
+            "Nombre": "={{ $json.Nombre }}",
+            "Apellido": "={{ $json.Apellido }}",
+            "Email": "={{ $json.Email }}",
+            "Teléfono": "={{ $json['Teléfono'] }}",
+            "Descripción": "={{ $json['Descripción'] }}",
+            "Latitud": "={{ $json.Latitud }}",
+            "Longitud": "={{ $json.Longitud }}",
+            "Categoría": "={{ $('Code in JavaScript').item.json.Categoria }}",
+            "Prioridad": "={{ $('Code in JavaScript').item.json.Prioridad }}",
+            "Confianza": "={{ $('Code in JavaScript').item.json.Confianza }}",
+            "Spam": "={{ $('Code in JavaScript').item.json.es_spam }}",
+            "Dirección": "={{ $json['Dirección'] }}"
+          },
+          "matchingColumns": [
+            "Ticket  ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket  ID",
+              "displayName": "Ticket  ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Apellido",
+              "displayName": "Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dirección",
+              "displayName": "Dirección",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Latitud",
+              "displayName": "Latitud",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Longitud",
+              "displayName": "Longitud",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Confianza",
+              "displayName": "Confianza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Spam",
+              "displayName": "Spam",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado Actual",
+              "displayName": "Estado Actual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        752,
+        -304
+      ],
+      "id": "a6c70f00-145b-4edd-9d2c-0cab87709d6c",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9ZrZCSNeDajOfyoZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7832436849",
+        "text": "Alerta! Ocurrió un problema al ingresar los datos, verifica y repite el proceso nuevamente",
+        "replyMarkup": "={{ $json['Teléfono'] }}",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        -288
+      ],
+      "id": "d553e7ec-35c6-41c6-9f03-2b24858b6e81",
+      "name": "Send a text message2",
+      "webhookId": "d2ad1f4a-a641-438f-b099-6aff6c968810",
+      "credentials": {
+        "telegramApi": {
+          "id": "MvUbr6Bpdqybn6Sg",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        288,
+        -304
+      ],
+      "id": "f49f5c5c-9d1a-4080-9831-f149944f6565",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mostrar Estado y Preguntar1": {
+      "main": [
+        []
+      ]
+    },
+    "Telegram Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Pedir info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "¿Existe ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Existe ID?": {
+      "main": [
+        [
+          {
+            "node": "Organizar estado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedir info": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No encontrado": {
+      "main": [
+        [
+          {
+            "node": "Pedir info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organizar estado": {
+      "main": [
+        [
+          {
+            "node": "Mostrar Estado y Preguntar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dashboard": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9f54b2f2e8fbb7c9988da48fad307503209c22fc9257731a82a078f91b9f1afd"
+  }
+}
