@@ -288,3 +288,4 @@ window.AMB_CONFIG = {
 ## 📄 Licencia
 
 Proyecto académico — Hecho por Santiago Sarmiento, Diego León y Fabio Capacho
+PERFECTO
