@@ -289,3 +289,5 @@ window.AMB_CONFIG = {
 
 Proyecto académico — Hecho por Santiago Sarmiento, Diego León y Fabio Capacho
 PERFECTO
+
+<img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/7cc03147-564f-4a08-b2f0-762a25c3b048" />
